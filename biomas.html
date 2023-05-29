@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Quiz sobre Biomas</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
+    
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: #98FB98;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #006400;
+    }
+    #quiz-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #FFFFFF;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .question {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .options label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    .submit-btn {
+      margin-top: 10px;
+      text-align: center;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 20px;
+      background-color: #e0e0e0;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background-color: #4caf50;
+      border-radius: 10px;
+    }
+    .feedback {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+    }
+    .feedback i {
+      margin-right: 5px;
+      color: #4caf50;
+    }
+    
+    .timer-container {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 20px;
+      color: #006400;
+    }
+    
+    .record-time {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 18px;
+      color: #4caf50;
+    }
+    
+    .restart-btn {
+      margin-top: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Quiz sobre Biomas</h1>
+  <div id="quiz-container">
+    <div class="progress-bar">
+      <div class="progress-bar-fill" style="width: 0%;"></div>
+    </div>
+    <div class="timer-container" id="timer-container"></div>
+    <div id="question-container"></div>
+    <div id="options-container"></div>
+    <div class="submit-btn">
+      <button onclick="submitAnswer()">Enviar Resposta</button>
+    </div>
+    <div class="feedback" id="feedback-container"></div>
+    <div class="record-time" id="record-time-container"></div>
+    <div class="restart-btn" id="restart-btn-container"></div>
+  </div>
+
+  <script>
+    var currentQuestion = 0;
+    var score = 0;
+    var progressBarFill = document.querySelector('.progress-bar-fill');
+    var feedbackContainer = document.getElementById('feedback-container');
+    var timerContainer = document.getElementById('timer-container');
+    var recordTimeContainer = document.getElementById('record-time-container');
+    var restartBtnContainer = document.getElementById('restart-btn-container');
+    var timer;
+    var timeLimit = 15; // Tempo limite em segundos para responder cada pergunta
+    var recordTime = Infinity; // Inicializa o registro de tempo com um valor alto
+
+    var questions = [
+  {
+    question: "Qual é o maior bioma terrestre do planeta?",
+    options: ["Amazônia", "Savana", "Taiga", "Deserto"],
+    answer: 0
+  },
+  {
+    question: "Qual bioma é caracterizado por árvores perenes e adaptadas ao clima frio?",
+    options: ["Cerrado", "Floresta Tropical", "Mata Atlântica", "Taiga"],
+    answer: 3
+  },
+  {
+    question: "Qual é o bioma conhecido como 'pulmão do mundo'?",
+    options: ["Cerrado", "Pampas", "Mata Atlântica", "Amazônia"],
+    answer: 3
+  },
+  {
+    question: "Qual bioma é caracterizado por longos períodos de seca e vegetação adaptada a condições extremas?",
+    options: ["Pampas", "Deserto", "Mata Atlântica", "Cerrado"],
+    answer: 1
+  },
+  {
+    question: "Qual é o bioma mais ameaçado do Brasil devido à ação humana?",
+    options: ["Pantanal", "Manguezal", "Cerrado", "Caatinga"],
+    answer: 2
+  },
+  {
+    question: "Qual é o bioma brasileiro que possui a maior biodiversidade?",
+    options: ["Pantanal", "Mata Atlântica", "Manguezal", "Pampas"],
+    answer: 1
+  },
+  {
+    question: "Qual bioma é caracterizado por solos extremamente férteis e vegetação de gramíneas?",
+    options: ["Mata Atlântica", "Cerrado", "Pantanal", "Taiga"],
+    answer: 1
+  },
+  {
+    question: "Qual é o bioma de transição entre a Floresta Amazônica e o Cerrado?",
+    options: ["Pampas", "Mata Atlântica", "Caatinga", "Savana"],
+    answer: 2
+  },
+  {
+    question: "Qual bioma é caracterizado por solos alagados e diversidade de aves e jacarés?",
+    options: ["Manguezal", "Caatinga", "Savana", "Pampas"],
+    answer: 0
+  },
+  {
+    question: "Qual é o bioma conhecido como 'mar de gramíneas'?",
+    options: ["Mata Atlântica", "Pampas", "Caatinga", "Deserto"],
+    answer: 1
+  }
+];
+
+    function loadQuestion() {
+      clearInterval(timer);
+      timerContainer.textContent = timeLimit;
+      startTimer();
+
+      var questionContainer = document.getElementById("question-container");
+      var optionsContainer = document.getElementById("options-container");
+
+      questionContainer.innerHTML = "<div class='question'>" + questions[currentQuestion].question + "</div>";
+
+      var optionsHTML = "";
+      var options = questions[currentQuestion].options;
+
+      for (var i = 0; i < options.length; i++) {
+        optionsHTML += "<label><input type='radio' name='option' value='" + i + "'>" + options[i] + "</label>";
+      }
+
+      optionsContainer.innerHTML = optionsHTML;
+    }
+
+    function startTimer() {
+      var timeLeft = timeLimit;
+      timerContainer.textContent = timeLeft;
+
+      timer = setInterval(function() {
+        timeLeft--;
+        timerContainer.textContent = timeLeft;
+
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          showRestartButton();
+        }
+      }, 1000);
+    }
+
+    function submitAnswer() {
+      clearInterval(timer);
+
+      var selectedOption = document.querySelector("input[name='option']:checked");
+      if (selectedOption === null) {
+        alert("Por favor, selecione uma opção.");
+        return;
+      }
+
+      var answer = parseInt(selectedOption.value);
+      if (answer === questions[currentQuestion].answer) {
+        score++;
+        updateFeedback(true);
+      } else {
+        updateFeedback(false);
+      }
+
+      currentQuestion++;
+      updateProgressBar();
+
+      if (currentQuestion < questions.length) {
+        loadQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function updateProgressBar() {
+      var progress = (currentQuestion / questions.length) * 100;
+      progressBarFill.style.width = progress + "%";
+    }
+
+    function updateFeedback(isCorrect) {
+      if (isCorrect) {
+        feedbackContainer.innerHTML = "<i class='fas fa-check-circle'></i> Resposta correta!";
+        feedbackContainer.style.color = "#4caf50";
+      } else {
+        feedbackContainer.innerHTML = "<i class='fas fa-times-circle'></i> Resposta incorreta!";
+        feedbackContainer.style.color = "#ff0000";
+      }
+    }
+
+    function showResult() {
+      var percentage = (score / questions.length) * 100;
+      var recordTimeText = "";
+
+      if (timerContainer.textContent < recordTime) {
+        recordTime = timerContainer.textContent;
+        recordTimeText = "<div class='record-time'>Novo recorde de tempo: " + recordTime + " segundos</div>";
+      }
+
+      var resultHTML = "<h3>Resultado do Quiz</h3>";
+      resultHTML += "<p>Você acertou " + score + " de " + questions.length + " perguntas.</p>";
+      resultHTML += "<p>Porcentagem de acerto: " + percentage + "%</p>";
+      resultHTML += recordTimeText;
+
+      restartBtnContainer.innerHTML = "<button onclick='restartQuiz()'>Recomeçar</button>";
+
+      document.getElementById("question-container").innerHTML = resultHTML;
+      document.getElementById("options-container").innerHTML = "";
+      feedbackContainer.innerHTML = "";
+    }
+
+    function restartQuiz() {
+      currentQuestion = 0;
+      score = 0;
+      progressBarFill.style.width = "0%";
+      feedbackContainer.innerHTML = "";
+      restartBtnContainer.innerHTML = "";
+      loadQuestion();
+    }
+
+    function showRestartButton() {
+      restartBtnContainer.innerHTML = "<button onclick='restartQuiz()'>Recomeçar</button>";
+    }
+
+    // Carrega a primeira pergunta
+    loadQuestion();
+  </script>
+</body>
+</html>
